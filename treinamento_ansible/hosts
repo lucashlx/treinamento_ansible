@@ -1,0 +1,16 @@
+[centos]
+# Debian
+#192.168.100.95
+centos-2 ansible_ssh_host=192.168.100.92
+centos-3 ansible_ssh_host=192.168.100.98
+
+
+[debian]
+debian ansible_ssh_host=192.168.100.95
+
+
+[servidores:children]
+debian
+centos
+
+

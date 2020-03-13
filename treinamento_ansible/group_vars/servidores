@@ -1,0 +1,9 @@
+ansible_ssh_port: 22
+ansible_ssh_user: lucas
+ansible_ssh_pass: 123
+ansible_become: yes
+ansible=become_method: sudo
+ansible_become_user: root
+ansible_become_pass: 123
+ansible_connection: ssh
+
