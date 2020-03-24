@@ -1,0 +1,10 @@
+---
+- name: Restart php-fpm
+  systemd: name=php-fpm state=restarted
+
+- name: Restart nginx
+  systemd: name=nginx state=restarted
+
+...
+# handlers file for wordpress
+

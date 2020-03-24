@@ -2,15 +2,6 @@
 
 #--- General ---#
 
-- name: Alterando o nome da maquina
-  command: echo "centos" > /etc/hostname
-  when: ansible_distribution == "CentOS" or ansible_distribution == "RedHat" 
-
-- name: Alterando o nome da maquina
-  command: echo "debian" > /etc/hostname
-  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" 
-
-
 - name: Change /etc/profile
   lineinfile: dest=/etc/profile line={{ item }}
   with_items:
@@ -60,6 +51,10 @@
 
 #--- Packages Manager Debian ---#
 
+- name: Copiando sources.list
+  copy: src=sources.list dest=/etc/apt/sources.list
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: Atualizando Sistema Operacional
   apt: update_cache=yes upgrade=yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
@@ -74,8 +69,8 @@
 
 #--- Gerenciamento de Usuarios
 
-#- name: Change root password
-#  user: name=root update_password=always password={{ root_pass_sha256 }}
+- name: Change root password
+  user: name=root update_password=always password={{ root_pass_sha256 }}
 
 - name: Criando usuario treinamento
   user:
@@ -88,17 +83,15 @@
 # o comando echo entrecomsuasenha | md5sum, vai gerar um hash que pode
 # ser replace a palavra senha entre aspas
     
-#--- Timezone
+#--- Timezone Settings ---#
 
-#- name: configurando localtime
-#  file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link force=yes
-#  when: ansible_distribution == 'centos' or ansible_distribution == 'redhat'
+- name: Configurando localtime
+  file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link force=yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: configurando o Timezone
-  file: src=/usr/share/zoneinfo/America/Sao_Paulo dest=/etc/localtime state=link force=yes
-#--- Configuracoes do SSH
+#--- SSH Service ---#
 
-- name: Configurando sshd_config
+- name: Setting basic SSH options
   lineinfile:
     dest=/etc/ssh/sshd_config
     state=present
@@ -111,18 +104,20 @@
     - { regexp: 'X11Forwarding yes', line: 'X11Forwarding no' }
 
 - name: Active Protocol 2 to SSH 
-  lineinfile: dest=/etc/ssh/sshd_config line='Protocol 2'
-      
-- name: Setting Allow Users to access (SSH) 
   lineinfile:
       dest=/etc/ssh/sshd_config
-      line='AllowUsers lucas'
+      line='Protocol 2'
+      
+- name: Setting Allow Users to access (SSH)
+  lineinfile:
+      dest=/etc/ssh/sshd_config
+      line='AllowUsers ontic'
 
-- name: Adicionando o motd
+- name: Add Motd
   template: src=motd dest=/etc/motd force=yes owner=root group=root mode=0755
-
+  
 - name: Add SSH Banner
-  copy: src=banner-ssh dest=/etc/ssh/banner_ssh
-  notify: 
+  copy: src=banner_ssh dest=/etc/ssh/banner_ssh
+  notify:
     - Restart SSH
 ...
